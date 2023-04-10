@@ -1,3 +1,9 @@
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+import java.io.FileWriter;
+import java.io.IOException;;
+
 /*
 
   Authors (group members):
@@ -15,6 +21,7 @@
 
 public class QuerySidekick
 {
+    Tree<String> searchTree = new Tree<String>();
     String[] guesses = new String[5];  // 5 guesses from QuerySidekick
 
     // initialization of ...
@@ -29,7 +36,42 @@ public class QuerySidekick
     // str2 = str1.replaceAll("\\s+", " ");
     public void processOldQueries(String oldQueryFile)
     {
-     
+        File file = new File(oldQueryFile);
+        Scanner scanner;
+        try {
+            scanner = new Scanner(file);
+        } catch (FileNotFoundException e) {
+            System.out.println("ERROR:\t Old query file not found");
+            return;
+        }
+
+        while (scanner.hasNextLine()) {
+            String line = scanner.nextLine();
+            line = line.replaceAll("\\s+", " ");
+            String[] tokens = line.split(" ");
+            TreeNode<String> lastNode = null;
+            for (int i = 0; i < tokens.length; i++) {
+                String s = tokens[i];
+                lastNode = searchTree.addNode(s, lastNode);
+                lastNode.incrementPassingFrequency();
+                if (i == tokens.length - 1) lastNode.incrementFrequency();
+            }
+        }
+
+        String treeString = searchTree.toString();
+
+        String treeFileName = oldQueryFile.substring(0, oldQueryFile.length() - 4) + "Tree.txt";
+        FileWriter fw;
+        try {
+            fw = new FileWriter(treeFileName);
+            fw.write(treeString);
+            fw.close();
+        } catch (IOException e) {
+            System.out.println("ERROR:\t Unable to save tree representation of old queries to \"" + treeFileName + "\"");
+        }
+
+
+        scanner.close();
     }
 
     // based on a character typed in by the user, return 5 query guesses in an array
