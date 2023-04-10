@@ -1,52 +1,34 @@
-import java.util.ArrayList;
-
 public class TreeNode {
-    private String data;
+	private int[] data;
     private int frequency;
     private int passingFrequency;
     private TreeNode parent;
-    private ArrayList<TreeNode> children;
+    private TreeNode[] children;
 
-    TreeNode(String data, TreeNode parent) {
-        this.data = data;
-        this.parent = parent;
-        children = new ArrayList<TreeNode>();
-        frequency = 0;
-    }
-
-    public TreeNode addChild(TreeNode child) {
-        for (TreeNode t : children) {
-            if (t.data.equals(child.data)) {
-                return t;
-            }
+    TreeNode(TreeBuilderNode tbn, TreeNode parent) {
+		data = new int[tbn.getDataArray().size()];
+		for (int i = 0; i < data.length; i++) {
+			data[i] = tbn.getDataArray().get(i);
+		}
+		frequency = tbn.getFrequency();
+		passingFrequency = tbn.getPassingFrequency();
+		this.parent = parent;
+        children = new TreeNode[tbn.getChildren().size()];
+        for (int i = 0; i < children.length; i++) {
+            children[i] = new TreeNode(tbn.getChildren().get(i), this);
         }
-        for (int i = 0; i < children.size(); i++) {
-            if (child.data.compareTo(children.get(i).data) < 0) {
-                children.add(i, child);
-                return child;
-            }
+    }
+
+    public String getData() { 
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < data.length; i++) {
+            sb.append(Dictionary.get(data[i]));
+            if (i < data.length - 1) sb.append(" ");
         }
-        children.add(child);
-        return child;
+        return sb.toString();
     }
-
-    public void mergeData(TreeNode child) {
-        data = data + " " + child.data;
-        frequency += child.frequency;
-        children = child.children;
-    }
-
-    public void incrementFrequency() {
-        frequency++;
-    }
-
-    public void incrementPassingFrequency() {
-        passingFrequency++;
-    }
-
-    public String getData() { return data; }
     public int getFrequency() { return frequency; }
     public int getPassingFrequency() { return passingFrequency; }
     public TreeNode getParent() { return parent; }
-    public ArrayList<TreeNode> getChildren() { return children; }
+    public TreeNode[] getChildren() { return children; }
 }

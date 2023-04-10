@@ -1,8 +1,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
-import java.io.FileWriter;
-import java.io.IOException;;
 
 /*
 
@@ -21,8 +19,10 @@ import java.io.IOException;;
 
 public class QuerySidekick
 {
-    Tree searchTree = new Tree();
+    
+    Tree searchTree;
     String[] guesses = new String[5];  // 5 guesses from QuerySidekick
+    long memoryUsage;
 
     // initialization of ...
     public QuerySidekick()
@@ -36,6 +36,10 @@ public class QuerySidekick
     // str2 = str1.replaceAll("\\s+", " ");
     public void processOldQueries(String oldQueryFile)
     {
+
+        memoryTear();
+
+        TreeBuilder treeBuilder = new TreeBuilder();
         File file = new File(oldQueryFile);
         Scanner scanner;
         try {
@@ -49,30 +53,26 @@ public class QuerySidekick
             String line = scanner.nextLine();
             line = line.replaceAll("\\s+", " ");
             String[] tokens = line.split(" ");
-            TreeNode lastNode = null;
+            TreeBuilderNode lastNode = null;
             for (int i = 0; i < tokens.length; i++) {
                 String s = tokens[i];
-                lastNode = searchTree.addNode(s, lastNode);
+                lastNode = treeBuilder.addNode(s, lastNode);
                 lastNode.incrementPassingFrequency();
                 if (i == tokens.length - 1) lastNode.incrementFrequency();
             }
         }
+        
+        treeBuilder.compress(null);
 
-        searchTree.compress(null);
+        System.out.println("CALCULATED MEMORY USAGE BEFORE: " + measureMemory());
 
-        String treeString = searchTree.toString();
+        searchTree = new Tree(treeBuilder);
 
-        String treeFileName = oldQueryFile.substring(0, oldQueryFile.length() - 4) + "Tree.txt";
-        FileWriter fw;
-        try {
-            fw = new FileWriter(treeFileName);
-            fw.write(treeString);
-            fw.close();
-        } catch (IOException e) {
-            System.out.println("ERROR:\t Unable to save tree representation of old queries to \"" + treeFileName + "\"");
-        }
+        searchTree.writeToFile(oldQueryFile);
+        treeBuilder = null;
 
-
+        Dictionary.writeToFile(oldQueryFile);
+        System.out.println("CALCULATED MEMORY USAGE AFTER: " + measureMemory());
         scanner.close();
     }
 
@@ -101,6 +101,17 @@ public class QuerySidekick
     public void feedback(boolean isCorrectGuess, String correctQuery)        
     {
 
+    }
+
+    public void memoryTear() {
+        System.gc();
+        memoryUsage = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+    }
+
+    public long measureMemory() {
+        System.gc();
+        long memoryAfter = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+        return memoryAfter - memoryUsage;
     }
 
 }
