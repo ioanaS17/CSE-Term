@@ -58,6 +58,8 @@ public class QuerySidekick
             }
         }
 
+        searchTree.compress();
+
         String treeString = searchTree.toString();
 
         String treeFileName = oldQueryFile.substring(0, oldQueryFile.length() - 4) + "Tree.txt";

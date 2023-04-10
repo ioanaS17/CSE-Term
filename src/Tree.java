@@ -15,6 +15,10 @@ public class Tree<T extends Comparable<T>> {
         return newNode;
     }
 
+    public void compress() {
+        
+    }
+
     public String toString() {
         return generateString(root, new ArrayList<Boolean>());
     }
