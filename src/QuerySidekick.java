@@ -21,7 +21,7 @@ import java.io.IOException;;
 
 public class QuerySidekick
 {
-    Tree<String> searchTree = new Tree<String>();
+    Tree searchTree = new Tree();
     String[] guesses = new String[5];  // 5 guesses from QuerySidekick
 
     // initialization of ...
@@ -49,7 +49,7 @@ public class QuerySidekick
             String line = scanner.nextLine();
             line = line.replaceAll("\\s+", " ");
             String[] tokens = line.split(" ");
-            TreeNode<String> lastNode = null;
+            TreeNode lastNode = null;
             for (int i = 0; i < tokens.length; i++) {
                 String s = tokens[i];
                 lastNode = searchTree.addNode(s, lastNode);
@@ -58,7 +58,7 @@ public class QuerySidekick
             }
         }
 
-        searchTree.compress();
+        searchTree.compress(null);
 
         String treeString = searchTree.toString();
 

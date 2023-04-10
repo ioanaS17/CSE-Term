@@ -1,33 +1,39 @@
 import java.util.ArrayList;
 
-public class Tree<T extends Comparable<T>> {
+public class Tree {
 
-    TreeNode<T> root;
+    TreeNode root;
 
     Tree() {
-        root = new TreeNode<T>(null, null);
+        root = new TreeNode(null, null);
     }
 
-    public TreeNode<T> addNode(T data, TreeNode<T> parent) {
+    public TreeNode addNode(String data, TreeNode parent) {
         if (parent == null) parent = root;
-        TreeNode<T> newNode = new TreeNode<T>(data, parent);
+        TreeNode newNode = new TreeNode(data, parent);
         newNode = parent.addChild(newNode);
         return newNode;
     }
 
-    public void compress() {
-        
+    public void compress(TreeNode startNode) {
+        if (startNode == null) startNode = root;
+        for (TreeNode t : startNode.getChildren()) {
+            compress(t);
+        }
+        if (startNode.getFrequency() == 0 && startNode.getChildren().size() == 1) {
+            startNode.mergeData(startNode.getChildren().get(0));
+        }
     }
 
     public String toString() {
         return generateString(root, new ArrayList<Boolean>());
     }
 
-    private String generateString(TreeNode<T> startingNode, ArrayList<Boolean> includeLines) {
+    private String generateString(TreeNode startingNode, ArrayList<Boolean> includeLines) {
         StringBuilder sb = new StringBuilder();
         includeLines.add(true);
         for (int i = 0; i < startingNode.getChildren().size(); i++) {
-            TreeNode<T> t = startingNode.getChildren().get(i);
+            TreeNode t = startingNode.getChildren().get(i);
             /*/
             for (int j = 0; j < includeLines.size(); j++) {
                 if (includeLines.get(j)) {
@@ -43,7 +49,7 @@ public class Tree<T extends Comparable<T>> {
                 } else sb.append("     ");
             }
             if (i == startingNode.getChildren().size() - 1) includeLines.set(includeLines.size() - 1, false);
-            sb.append(t.getData().toString());
+            sb.append(t.getData());
             sb.append(" (");
             sb.append(t.getPassingFrequency());
             sb.append(" / ");

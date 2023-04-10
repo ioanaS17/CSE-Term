@@ -1,21 +1,21 @@
 import java.util.ArrayList;
 
-public class TreeNode<T extends Comparable<T>> {
-    private T data;
+public class TreeNode {
+    private String data;
     private int frequency;
     private int passingFrequency;
-    private TreeNode<T> parent;
-    private ArrayList<TreeNode<T>> children;
+    private TreeNode parent;
+    private ArrayList<TreeNode> children;
 
-    TreeNode(T data, TreeNode<T> parent) {
+    TreeNode(String data, TreeNode parent) {
         this.data = data;
         this.parent = parent;
-        children = new ArrayList<TreeNode<T>>();
+        children = new ArrayList<TreeNode>();
         frequency = 0;
     }
 
-    public TreeNode<T> addChild(TreeNode<T> child) {
-        for (TreeNode<T> t : children) {
+    public TreeNode addChild(TreeNode child) {
+        for (TreeNode t : children) {
             if (t.data.equals(child.data)) {
                 return t;
             }
@@ -30,6 +30,12 @@ public class TreeNode<T extends Comparable<T>> {
         return child;
     }
 
+    public void mergeData(TreeNode child) {
+        data = data + " " + child.data;
+        frequency += child.frequency;
+        children = child.children;
+    }
+
     public void incrementFrequency() {
         frequency++;
     }
@@ -38,9 +44,9 @@ public class TreeNode<T extends Comparable<T>> {
         passingFrequency++;
     }
 
-    public T getData() { return data; }
+    public String getData() { return data; }
     public int getFrequency() { return frequency; }
     public int getPassingFrequency() { return passingFrequency; }
-    public TreeNode<T> getParent() { return parent; }
-    public ArrayList<TreeNode<T>> getChildren() { return children; }
+    public TreeNode getParent() { return parent; }
+    public ArrayList<TreeNode> getChildren() { return children; }
 }
