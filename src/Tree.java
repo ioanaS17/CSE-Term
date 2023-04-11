@@ -4,11 +4,32 @@ import java.util.ArrayList;
 
 public class Tree {
 
-    TreeNode root;
+    private TreeNode root;
+    private boolean hasBeenCompressed = false;
 
-    Tree(TreeBuilder tb) {
-        root = new TreeNode(tb.getRoot(), null);
+    Tree() {
+        root = new TreeNode(null, null);
     }
+
+    public TreeNode addNode(String data, TreeNode parent) {
+        if (parent == null) parent = root;
+        TreeNode newNode = new TreeNode(data, parent);
+        newNode = parent.addChild(newNode);
+        return newNode;
+    }
+
+    public void compress(TreeNode startNode) {
+        if (startNode == null) startNode = root;
+        for (TreeNode t : startNode.getChildren()) {
+            compress(t);
+        }
+        if (startNode.getFrequency() == 0 && startNode.getChildren().length == 1) {
+            startNode.mergeData(startNode.getChildren()[0]);
+        }
+        hasBeenCompressed = true;
+    }
+
+    public TreeNode getRoot() { return root; }
 
     public String toString() {
         return generateString(root, new ArrayList<Boolean>());
@@ -49,7 +70,9 @@ public class Tree {
     public void writeToFile(String filename) {
         String treeString = toString();
 
-        String treeFileName = filename.substring(0, filename.length() - 4) + "Tree.txt";
+        String treeFileName = filename.substring(0, filename.length() - 4);
+        if (hasBeenCompressed) treeFileName += "CompressedTree.txt";
+        else treeFileName += "Tree.txt";
         FileWriter fw;
         try {
             fw = new FileWriter(treeFileName);

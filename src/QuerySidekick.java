@@ -20,9 +20,11 @@ import java.util.Scanner;
 public class QuerySidekick
 {
     
-    Tree searchTree;
+    Tree searchTree = new Tree();
     String[] guesses = new String[5];  // 5 guesses from QuerySidekick
-    long memoryUsage;
+    long startTime;
+    int guessCount = 0;
+    int lines = 0;
 
     // initialization of ...
     public QuerySidekick()
@@ -37,43 +39,50 @@ public class QuerySidekick
     public void processOldQueries(String oldQueryFile)
     {
 
-        memoryTear();
-
-        TreeBuilder treeBuilder = new TreeBuilder();
         File file = new File(oldQueryFile);
         Scanner scanner;
         try {
+            scanner = new Scanner(file);
+            burnLines(scanner);
+            scanner.close();
             scanner = new Scanner(file);
         } catch (FileNotFoundException e) {
             System.out.println("ERROR:\t Old query file not found");
             return;
         }
 
+        startTime = System.currentTimeMillis();
+
+        int ticker = 0;
         while (scanner.hasNextLine()) {
+            ticker++;
+            if (ticker % 100 == 0) System.gc();
+
+            attemptPrintBar(ticker, lines);
+
             String line = scanner.nextLine();
             line = line.replaceAll("\\s+", " ");
             String[] tokens = line.split(" ");
-            TreeBuilderNode lastNode = null;
+            TreeNode lastNode = null;
             for (int i = 0; i < tokens.length; i++) {
                 String s = tokens[i];
-                lastNode = treeBuilder.addNode(s, lastNode);
+                lastNode = searchTree.addNode(s, lastNode);
                 lastNode.incrementPassingFrequency();
                 if (i == tokens.length - 1) lastNode.incrementFrequency();
             }
         }
-        
-        treeBuilder.compress(null);
-
-        System.out.println("CALCULATED MEMORY USAGE BEFORE: " + measureMemory());
-
-        searchTree = new Tree(treeBuilder);
 
         searchTree.writeToFile(oldQueryFile);
-        treeBuilder = null;
+
+        searchTree.compress(null);
+
+
+        searchTree.writeToFile(oldQueryFile);
 
         Dictionary.writeToFile(oldQueryFile);
-        System.out.println("CALCULATED MEMORY USAGE AFTER: " + measureMemory());
+
         scanner.close();
+
     }
 
     // based on a character typed in by the user, return 5 query guesses in an array
@@ -81,7 +90,8 @@ public class QuerySidekick
     // currCharPosition: position of the current character in the query, starts from 0
     public String[] guess(char currChar, int currCharPosition)
     {
-	
+        guessCount++;
+        if (guessCount % 10000 == 0) System.gc();
         return guesses;
     }
 
@@ -103,15 +113,35 @@ public class QuerySidekick
 
     }
 
-    public void memoryTear() {
-        System.gc();
-        memoryUsage = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+    private void attemptPrintBar(int ticker, int lines) {
+        int barDisplayTime = 800;
+            if (System.currentTimeMillis() - startTime > barDisplayTime) {
+                startTime += barDisplayTime;
+                int barLength = 50;
+                StringBuilder sb = new StringBuilder();
+                sb.append("PROGRESS: [");
+                int fill = (int)(barLength * ticker / (double)lines);
+                for (int i = 0; i < fill; i++) {
+                    sb.append("#");
+                }
+                for (int i = fill; i < barLength; i++) {
+                    sb.append(" ");
+                }
+                sb.append("] (");
+                sb.append(ticker);
+                sb.append("/");
+                sb.append(lines);
+                sb.append(")");
+                System.out.println(sb.toString());
+            }
     }
 
-    public long measureMemory() {
-        System.gc();
-        long memoryAfter = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-        return memoryAfter - memoryUsage;
+    private void burnLines(Scanner scanner) {
+        while (scanner.hasNextLine()) {
+            scanner.nextLine();
+            lines++;
+            if (lines % 1000 == 0) System.gc();
+        }
     }
 
 }
